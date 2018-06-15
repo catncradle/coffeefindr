@@ -1,32 +1,25 @@
-//https://maps.googleapis.com/maps/api/js?key=YOUR_API_KEY&libraries=places
+// const googleplaces = require("googleplaces");
 
-let map;
-let service;
-let infowindow;
+// export default googleplaces("AIzaSyCsrkC5mOTfE3h2L8_lqs0nxLQUywJWZAo", "json");
 
-function initialize() {
-  let pyrmont = new google.maps.LatLng(-33.8665433, 151.1956316);
+const RapidAPI = require("rapidapi-connect");
+const rapid = new RapidAPI(
+  "default-application_5b2193e6e4b09cbc057a08fe",
+  "e9d73727-1f2b-40be-b108-08f4c973c18d"
+);
 
-  map = new google.maps.Map(document.getElementById("map"), {
-    center: pyrmont,
-    zoom: 15
-  });
+export default rapid;
 
-  let request = {
-    location: pyrmont,
-    radius: "500",
-    type: ["restaurant"]
-  };
-
-  service = new google.maps.places.PlacesService(map);
-  service.nearbySearch(request, callback);
-}
-
-function callback(results, status) {
-  if (status == google.maps.places.PlacesServiceStatus.OK) {
-    for (let i = 0; i < results.length; i++) {
-      let place = results[i];
-      createMarker(results[i]);
-    }
-  }
-}
+// rapid
+//   .call("GooglePlaces", "getNearbyPlacesByType", {
+//     coordinate: "-33.8670522, 151.1957362",
+//     apiKey: "AIzaSyCsrkC5mOTfE3h2L8_lqs0nxLQUywJWZAo",
+//     radius: "500",
+//     type: ["cafe"]
+//   })
+//   .on("success", payload => {
+//     console.log(payload);
+//   })
+//   .on("error", payload => {
+//     console.log(payload);
+//   });

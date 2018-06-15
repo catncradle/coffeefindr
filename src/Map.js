@@ -1,6 +1,6 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
-import axios from "axios";
+import service from "./nearbySearch";
 
 export class Map extends Component {
   constructor() {
@@ -9,23 +9,22 @@ export class Map extends Component {
       locations: [
         {
           name: "New York County Supreme Court",
-          location: { lat: 40.7143033, lng: -74.0036919 }
+          location: { lat: 40.7092575, lng: -74.0070346 }
         },
         {
           name: "Queens County Supreme Court",
-          location: { lat: 40.7046946, lng: -73.8091145 }
+          location: {
+            lat: 40.709438,
+            lng: -74.010086
+          }
         },
         {
           name: "Kings County Supreme Court",
-          location: { lat: 40.6940226, lng: -73.9890967 }
+          location: { lat: 40.710078, lng: -74.007679 }
         },
         {
           name: "Richmond County Supreme Court",
-          location: { lat: 40.6412336, lng: -74.0768597 }
-        },
-        {
-          name: "Bronx Supreme Court",
-          location: { lat: 40.8262388, lng: -73.9235238 }
+          location: { lat: 40.711619, lng: -74.00673 }
         }
       ]
     };
@@ -79,6 +78,8 @@ export class Map extends Component {
       );
 
       this.map = new maps.Map(node, mapConfig);
+
+      //click handler on map
       maps.event.addListener(this.map, "click", event => {
         // const marker = new google.maps.Marker({
         //   position: event.latLng,
@@ -86,10 +87,29 @@ export class Map extends Component {
         // });
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
-        axios.post(
-          "https://maps.googleapis.com/maps/api/place/findplacefromtext/output?input=parameters"
-        );
-        this.setState({ currentLocation: { lat, lng } });
+        let nextState = { currentLocation: { lat, lng } };
+        // var location = new google.maps.LatLng(lat, lng);
+        let request = {
+          coordinate: `${lat}, ${lng}`,
+          apiKey: "AIzaSyCsrkC5mOTfE3h2L8_lqs0nxLQUywJWZAo",
+          radius: "500",
+          type: ["cafe"]
+        };
+
+        service
+          .call("GooglePlaces", "getNearbyPlacesByType", request)
+          .on("success", payload => {
+            nextState = {
+              ...nextState,
+              locations: [...payload.results.slice(0, 4)]
+            };
+            console.log(nextState);
+          })
+          .on("error", payload => {
+            console.log(payload);
+          });
+
+        this.setState(nextState);
       });
       this.state.locations.forEach(location => {
         // iterate through locations saved in state
