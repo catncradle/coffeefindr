@@ -6,27 +6,7 @@ export class Map extends Component {
   constructor() {
     super();
     this.state = {
-      locations: [
-        {
-          name: "New York County Supreme Court",
-          location: { lat: 40.7092575, lng: -74.0070346 }
-        },
-        {
-          name: "Queens County Supreme Court",
-          location: {
-            lat: 40.709438,
-            lng: -74.010086
-          }
-        },
-        {
-          name: "Kings County Supreme Court",
-          location: { lat: 40.710078, lng: -74.007679 }
-        },
-        {
-          name: "Richmond County Supreme Court",
-          location: { lat: 40.711619, lng: -74.00673 }
-        }
-      ]
+      locations: []
     };
   }
 
@@ -54,6 +34,22 @@ export class Map extends Component {
     if (prevState.currentLocation !== this.state.currentLocation) {
       this.recenterMap();
     }
+    const { google } = this.props;
+    const maps = google.maps;
+    this.state.locations.forEach(location => {
+      // iterate through locations saved in state
+      location = location.geometry.location;
+      console.log(location);
+      const marker = new google.maps.Marker({
+        // creates a new Google maps Marker object.
+        position: {
+          lat: location.lat,
+          lng: location.lng
+        },
+        animation: google.maps.Animation.DROP, // sets position of marker to specified location
+        map: this.map // sets markers to appear on the map we just created on line 35
+      });
+    });
   }
 
   loadMap() {
@@ -101,25 +97,26 @@ export class Map extends Component {
           .on("success", payload => {
             nextState = {
               ...nextState,
-              locations: [...payload.results.slice(0, 4)]
+              locations: [...payload.results.slice(0, 5)]
             };
             console.log(nextState);
+            this.setState(nextState);
           })
           .on("error", payload => {
             console.log(payload);
           });
 
-        this.setState(nextState);
+        console.log(this.state);
       });
-      this.state.locations.forEach(location => {
-        // iterate through locations saved in state
-        const marker = new google.maps.Marker({
-          // creates a new Google maps Marker object.
-          position: { lat: location.location.lat, lng: location.location.lng }, // sets position of marker to specified location
-          map: this.map, // sets markers to appear on the map we just created on line 35
-          title: location.name // the title of the marker is set to the name of the location
-        });
-      });
+      // this.state.locations.forEach(location => {
+      //   // iterate through locations saved in state
+      //   const marker = new google.maps.Marker({
+      //     // creates a new Google maps Marker object.
+      //     position: { lat: location.location.lat, lng: location.location.lng }, // sets position of marker to specified location
+      //     map: this.map, // sets markers to appear on the map we just created on line 35
+      //     title: location.name // the title of the marker is set to the name of the location
+      //   });
+      // });
     }
   }
 
