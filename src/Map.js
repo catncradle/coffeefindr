@@ -1,6 +1,8 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import service from "./nearbySearch";
+const image = "https://png.icons8.com/color/2x/coffee-to-go.png";
+let markers = [];
 
 export class Map extends Component {
   constructor() {
@@ -36,19 +38,25 @@ export class Map extends Component {
     }
     const { google } = this.props;
     const maps = google.maps;
+    markers.forEach(marker => {
+      marker.setMap(null);
+    });
+    markers = [];
     this.state.locations.forEach(location => {
       // iterate through locations saved in state
       location = location.geometry.location;
-      console.log(location);
       const marker = new google.maps.Marker({
         // creates a new Google maps Marker object.
         position: {
           lat: location.lat,
           lng: location.lng
         },
-        animation: google.maps.Animation.DROP, // sets position of marker to specified location
+        animation: google.maps.Animation.DROP,
+        icon: image,
         map: this.map // sets markers to appear on the map we just created on line 35
       });
+
+      markers.push(marker);
     });
   }
 
@@ -84,7 +92,6 @@ export class Map extends Component {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         let nextState = { currentLocation: { lat, lng } };
-        // var location = new google.maps.LatLng(lat, lng);
         let request = {
           coordinate: `${lat}, ${lng}`,
           apiKey: "AIzaSyCsrkC5mOTfE3h2L8_lqs0nxLQUywJWZAo",
@@ -99,7 +106,7 @@ export class Map extends Component {
               ...nextState,
               locations: [...payload.results.slice(0, 5)]
             };
-            console.log(nextState);
+
             this.setState(nextState);
           })
           .on("error", payload => {
@@ -108,15 +115,6 @@ export class Map extends Component {
 
         console.log(this.state);
       });
-      // this.state.locations.forEach(location => {
-      //   // iterate through locations saved in state
-      //   const marker = new google.maps.Marker({
-      //     // creates a new Google maps Marker object.
-      //     position: { lat: location.location.lat, lng: location.location.lng }, // sets position of marker to specified location
-      //     map: this.map, // sets markers to appear on the map we just created on line 35
-      //     title: location.name // the title of the marker is set to the name of the location
-      //   });
-      // });
     }
   }
 
@@ -126,7 +124,11 @@ export class Map extends Component {
 
     const google = this.props.google;
     const maps = google.maps;
-
+    const marker = new google.maps.Marker({
+      position: curr,
+      map: this.map
+    });
+    // markers.push(marker);
     if (map) {
       let center = new maps.LatLng(curr.lat, curr.lng);
       map.panTo(center);
