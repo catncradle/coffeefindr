@@ -1,32 +1,14 @@
 import React, { Component } from "react";
 import ReactDOM from "react-dom";
 import service from "./nearbySearch";
+const image = "https://png.icons8.com/color/2x/coffee-to-go.png";
+let markers = [];
 
 export class Map extends Component {
   constructor() {
     super();
     this.state = {
-      locations: [
-        {
-          name: "New York County Supreme Court",
-          location: { lat: 40.7092575, lng: -74.0070346 }
-        },
-        {
-          name: "Queens County Supreme Court",
-          location: {
-            lat: 40.709438,
-            lng: -74.010086
-          }
-        },
-        {
-          name: "Kings County Supreme Court",
-          location: { lat: 40.710078, lng: -74.007679 }
-        },
-        {
-          name: "Richmond County Supreme Court",
-          location: { lat: 40.711619, lng: -74.00673 }
-        }
-      ]
+      locations: []
     };
   }
 
@@ -54,6 +36,28 @@ export class Map extends Component {
     if (prevState.currentLocation !== this.state.currentLocation) {
       this.recenterMap();
     }
+    const { google } = this.props;
+    const maps = google.maps;
+    markers.forEach(marker => {
+      marker.setMap(null);
+    });
+    markers = [];
+    this.state.locations.forEach(location => {
+      // iterate through locations saved in state
+      location = location.geometry.location;
+      const marker = new google.maps.Marker({
+        // creates a new Google maps Marker object.
+        position: {
+          lat: location.lat,
+          lng: location.lng
+        },
+        animation: google.maps.Animation.DROP,
+        icon: image,
+        map: this.map // sets markers to appear on the map we just created on line 35
+      });
+
+      markers.push(marker);
+    });
   }
 
   loadMap() {
@@ -88,7 +92,6 @@ export class Map extends Component {
         const lat = event.latLng.lat();
         const lng = event.latLng.lng();
         let nextState = { currentLocation: { lat, lng } };
-        // var location = new google.maps.LatLng(lat, lng);
         let request = {
           coordinate: `${lat}, ${lng}`,
           apiKey: "AIzaSyCsrkC5mOTfE3h2L8_lqs0nxLQUywJWZAo",
@@ -101,24 +104,16 @@ export class Map extends Component {
           .on("success", payload => {
             nextState = {
               ...nextState,
-              locations: [...payload.results.slice(0, 4)]
+              locations: [...payload.results.slice(0, 5)]
             };
-            console.log(nextState);
+
+            this.setState(nextState);
           })
           .on("error", payload => {
             console.log(payload);
           });
 
-        this.setState(nextState);
-      });
-      this.state.locations.forEach(location => {
-        // iterate through locations saved in state
-        const marker = new google.maps.Marker({
-          // creates a new Google maps Marker object.
-          position: { lat: location.location.lat, lng: location.location.lng }, // sets position of marker to specified location
-          map: this.map, // sets markers to appear on the map we just created on line 35
-          title: location.name // the title of the marker is set to the name of the location
-        });
+        console.log(this.state);
       });
     }
   }
@@ -129,7 +124,11 @@ export class Map extends Component {
 
     const google = this.props.google;
     const maps = google.maps;
-
+    const marker = new google.maps.Marker({
+      position: curr,
+      map: this.map
+    });
+    // markers.push(marker);
     if (map) {
       let center = new maps.LatLng(curr.lat, curr.lng);
       map.panTo(center);
